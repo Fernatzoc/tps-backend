@@ -9,15 +9,6 @@ use Validator;
 
 class ProveedorController extends Controller
 {
-    /**
-     * Instantiate a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->middleware('auth.jwt');
-    }
 
     /**
      * Display a listing of the resource.
@@ -26,8 +17,11 @@ class ProveedorController extends Controller
      */
     public function index()
     {
-        $providers = Proveedor::all();
-        return $providers;
+        return response()->json([
+            'total' => Proveedor::count(),
+            'proveedores' => Proveedor::all()
+        ]);
+
     }
 
     /**
