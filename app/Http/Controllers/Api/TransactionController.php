@@ -37,6 +37,7 @@ class TransactionController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'id_producto' => 'required',
+            'movimiento' => 'required',
             'fecha' => 'required',
             'cantidad' => 'required',
             'costo_unitario' => 'required'
@@ -48,27 +49,61 @@ class TransactionController extends Controller
             ], 400);
         }
 
+        if($request->movimiento == 'entrada' ) {
 
-        $product = Product::findOrFail($request->id_producto);
-        $stock = $product->stock;
-        $product->stock = intval($stock) + intval($request->cantidad);
-        $product->save();
+            $product = Product::findOrFail($request->id_producto);
+            $stock = $product->stock;
+            $product->stock = intval($stock) + intval($request->cantidad);
+            $product->save();
 
-        $transaction = new Transaction();
-        $transaction->id_producto = intval($request->id_producto);
-        $transaction->fecha = $request->fecha;
-        $transaction->cantidad = $request->cantidad;
-        $transaction->costo_unitario = $request->costo_unitario;
-        $transaction->total = floatval($request->cantidad) * floatval($request->costo_unitario);
+            $transaction = new Transaction();
+            $transaction->id_producto = intval($request->id_producto);
+            $transaction->fecha = $request->fecha;
+            $transaction->movimiento = $request->movimiento;
+            $transaction->cantidad = $request->cantidad;
+            $transaction->costo_unitario = $request->costo_unitario;
+            $transaction->total = floatval($request->cantidad) * floatval($request->costo_unitario);
 
-        $transaction->save();
+            $transaction->save();
 
-        return response()->json([
-           'ok' => true,
-           'entry' => $transaction,
-           'message' => 'Entrada registrada correctamente'
-        ]);
+            return response()->json([
+                'ok' => true,
+                'transaction' => $transaction,
+                'message' => 'Entrada registrada correctamente'
+            ]);
 
+        } elseif( $request->movimiento == "salida"  ) {
+            $product = Product::findOrFail($request->id_producto);
+            $stock = $product->stock;
+
+            if(intval($stock) < intval($request->cantidad))
+            {
+                return response()->json([
+                    'ok' => true,
+                    'message' => 'Error stock insuficiente'
+                ]);
+            }
+
+            $product->stock = intval($stock) - intval($request->cantidad);
+            $product->save();
+
+            $transaction = new Transaction();
+            $transaction->id_producto = intval($request->id_producto);
+            $transaction->fecha = $request->fecha;
+            $transaction->movimiento = $request->movimiento;
+            $transaction->cantidad = $request->cantidad;
+            $transaction->costo_unitario = $request->costo_unitario;
+            $transaction->total = floatval($request->cantidad) * floatval($request->costo_unitario);
+
+            $transaction->save();
+
+            return response()->json([
+                'ok' => true,
+                'transaction' => $transaction,
+                'message' => 'Entrada registrada correctamente'
+            ]);
+
+        }
     }
 
     /**
@@ -96,6 +131,7 @@ class TransactionController extends Controller
         $validator = Validator::make($request->all(), [
             'id_producto' => 'required',
             'fecha' => 'required',
+            'movimiento' => 'required',
             'cantidad' => 'required',
             'costo_unitario' => 'required'
         ]);
@@ -106,23 +142,47 @@ class TransactionController extends Controller
             ], 400);
         }
 
-        $product = Product::findOrFail($request->id_producto);
-        $transaction = Transaction::findOrFail($request->id);
-        $stock = $product->stock;
-        $newStock = intval($stock) - intval($transaction->cantidad);
-        $product->stock = intval($newStock) + intval($request->cantidad);
-        $product->save();
+        if($request->movimiento == 'entrada' ) {
 
-        $transaction->id_producto = intval($request->id_producto);
-        $transaction->fecha = $request->fecha;
-        $transaction->cantidad = $request->cantidad;
-        $transaction->costo_unitario = $request->costo_unitario;
-        $transaction->total = floatval($request->cantidad) * floatval($request->costo_unitario);
+            $product = Product::findOrFail($request->id_producto);
+            $transaction = Transaction::findOrFail($id);
+            $stock = $product->stock;
+            $newStock = intval($stock) - intval($transaction->cantidad);
+            $product->stock = intval($newStock) + intval($request->cantidad);
+            $product->save();
 
-        $transaction->save();
+            $transaction->id_producto = intval($request->id_producto);
+            $transaction->fecha = $request->fecha;
+            $transaction->movimiento = $request->movimiento;
+            $transaction->cantidad = $request->cantidad;
+            $transaction->costo_unitario = $request->costo_unitario;
+            $transaction->total = floatval($request->cantidad) * floatval($request->costo_unitario);
 
-        return $transaction;
+            $transaction->save();
 
+            return $transaction;
+
+        } elseif( $request->movimiento == "salida"  ) {
+
+            $product = Product::findOrFail($request->id_producto);
+            $transaction = Transaction::findOrFail($id);
+            $stock = $product->stock;
+            $newStock = intval($stock) - intval($transaction->cantidad);
+            $product->stock = intval($newStock) - intval($request->cantidad);
+            $product->save();
+
+            $transaction->id_producto = intval($request->id_producto);
+            $transaction->fecha = $request->fecha;
+            $transaction->movimiento = $request->movimiento;
+            $transaction->cantidad = $request->cantidad;
+            $transaction->costo_unitario = $request->costo_unitario;
+            $transaction->total = floatval($request->cantidad) * floatval($request->costo_unitario);
+
+            $transaction->save();
+
+            return $transaction;
+
+        }
     }
 
     /**
@@ -133,18 +193,37 @@ class TransactionController extends Controller
      */
     public function destroy($id)
     {
-
         $transaction = Transaction::findOrFail($id);
-        $product = Product::findOrFail($transaction->id_producto);
-        $stock = $product->stock;
-        $newStock = intval($stock) - intval($transaction->cantidad);
-        $product->stock = intval($newStock);
-        $product->save();
 
-        Transaction::destroy($id);
-        return response()->json([
-           'message' => 'Entrada eliminada correctamente'
-        ]);
+        if($transaction->movimiento == 'entrada')
+        {
+            $transaction = Transaction::findOrFail($id);
+            $product = Product::findOrFail($transaction->id_producto);
+            $stock = $product->stock;
+            $newStock = intval($stock) - intval($transaction->cantidad);
+            $product->stock = intval($newStock);
+            $product->save();
+
+            Transaction::destroy($id);
+            return response()->json([
+                'message' => 'Entrada eliminada correctamente'
+            ]);
+
+        } elseif($transaction->movimiento == 'salida')
+        {
+            $transaction = Transaction::findOrFail($id);
+            $product = Product::findOrFail($transaction->id_producto);
+            $stock = $product->stock;
+            $newStock = intval($stock) + intval($transaction->cantidad);
+            $product->stock = intval($newStock);
+            $product->save();
+
+            Transaction::destroy($id);
+            return response()->json([
+                'message' => 'Entrada eliminada correctamente'
+            ]);
+
+        }
 
     }
 }
