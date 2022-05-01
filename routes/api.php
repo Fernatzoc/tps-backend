@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\CategoriaController;
 use App\Http\Controllers\Api\ProveedorController;
+use App\Http\Controllers\Api\TransactionController;
 
 
 /*
@@ -75,3 +76,15 @@ Route::controller(ProveedorController::class)->group(function() {
     Route::put('provider/{id}', 'update');
     Route::delete('provider/{id}', 'destroy');
 });
+
+
+
+Route::controller(TransactionController::class)->group(function() {
+    Route::get('entries', 'index');
+    Route::post('entry', 'store');
+    Route::get('entry/{id}', 'show');
+    Route::put('entry/{id}', 'update');
+    Route::delete('entry/{id}', 'destroy');
+});
+
+

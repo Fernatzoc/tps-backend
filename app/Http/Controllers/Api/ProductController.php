@@ -34,7 +34,6 @@ class ProductController extends Controller
 
         $validator = Validator::make($request->all(), [
             'nombre' => 'required',
-            'precio' => 'required',
             'stock' => 'required',
             'id_proveedor' => 'required',
             'id_categoria' => 'required'
@@ -48,7 +47,6 @@ class ProductController extends Controller
 
         $product = new Product();
         $product->nombre = $request->nombre;
-        $product->precio = $request->precio;
         $product->stock = $request->stock;
         $product->id_proveedor = $request->id_proveedor;
         $product->id_categoria = $request->id_categoria;
@@ -57,7 +55,7 @@ class ProductController extends Controller
 
         return response()->json([
            'ok' => true,
-           'producto' => $product,
+           'product' => $product,
            'message' => 'Producto creado correctamente'
         ]);
     }
@@ -85,7 +83,6 @@ class ProductController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'nombre' => 'required',
-            'precio' => 'required',
             'stock' => 'required',
             'id_proveedor' => 'required',
             'id_categoria' => 'required'
