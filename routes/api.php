@@ -80,11 +80,11 @@ Route::controller(ProveedorController::class)->group(function() {
 
 
 Route::controller(TransactionController::class)->group(function() {
-    Route::get('entries', 'index');
-    Route::post('entry', 'store');
-    Route::get('entry/{id}', 'show');
-    Route::put('entry/{id}', 'update');
-    Route::delete('entry/{id}', 'destroy');
+    Route::get('transactions', 'index');
+    Route::post('transaction', 'store');
+    Route::get('transaction/{id}', 'show');
+    Route::put('transaction/{id}', 'update');
+    Route::delete('transaction/{id}', 'destroy');
 });
 
 

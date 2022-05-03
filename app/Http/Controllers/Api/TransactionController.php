@@ -22,7 +22,7 @@ class TransactionController extends Controller
     {
         return response()->json([
             'total' => Transaction::count(),
-            'entries' => Transaction::all()
+            'transactions' => Transaction::all()
         ]);
 
     }
