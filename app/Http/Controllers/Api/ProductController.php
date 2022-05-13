@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Validator;
 
 class ProductController extends Controller
@@ -64,12 +65,36 @@ class ProductController extends Controller
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function show($id)
     {
-        $product = Product::find($id);
-        return  $product;
+        //$product = Product::find($id);
+        $product = DB::table('products')
+            ->join('proveedores', 'proveedores.id', '=', 'products.id_proveedor')
+            ->join('categorias', 'categorias.id', '=', 'products.id_categoria')
+            ->select('products.*', 'proveedores.nombre as proveedor', 'categorias.nombre as categoria')
+            ->where('products.id', '=', $id)
+            ->get();
+
+        $entradas = DB::table('transactions')
+            ->select('transactions.*')
+            ->where('transactions.movimiento', '=', 'entrada')
+            ->where('transactions.id_producto', '=', $id)
+            ->get();
+
+        $salidas = DB::table('transactions')
+            ->select('transactions.*')
+            ->where('transactions.movimiento', '=', 'salida')
+            ->where('transactions.id_producto', '=', $id)
+            ->get();
+
+
+        return response()->json([
+            'product' => $product,
+            'entradas' => $entradas,
+            'salidas' => $salidas
+        ]);
     }
 
     /**
@@ -96,7 +121,6 @@ class ProductController extends Controller
 
         $product = Product::findOrFail($request->id);
         $product->nombre = $request->nombre;
-        $product->precio = $request->precio;
         $product->stock = $request->stock;
         $product->id_proveedor = $request->id_proveedor;
         $product->id_categoria = $request->id_categoria;
