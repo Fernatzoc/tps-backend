@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\CategoriaController;
 use App\Http\Controllers\Api\ProveedorController;
 use App\Http\Controllers\Api\TransactionController;
+use App\Http\Controllers\Api\DashbordController;
 
 
 /*
@@ -85,6 +86,11 @@ Route::controller(TransactionController::class)->group(function() {
     Route::get('transaction/{id}', 'show');
     Route::put('transaction/{id}', 'update');
     Route::delete('transaction/{id}', 'destroy');
+});
+
+
+Route::controller(DashbordController::class)->group(function() {
+    Route::get('dashboard', 'index');
 });
 
 

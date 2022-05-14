@@ -71,7 +71,7 @@ class TransactionController extends Controller
             $response = response()->json([
                 'ok' => true,
                 'transaction' => $transaction,
-                'message' => 'Entrada registrada correctamente'
+                'message' => 'Transacción  registrada correctamente'
             ]);
 
         } elseif( $request->movimiento == "salida"  ) {
@@ -102,7 +102,7 @@ class TransactionController extends Controller
             $response = response()->json([
                 'ok' => true,
                 'transaction' => $transaction,
-                'message' => 'Entrada registrada correctamente'
+                'message' => 'Transacción  registrada correctamente'
             ]);
 
         }
@@ -210,7 +210,7 @@ class TransactionController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
     public function destroy($id)
     {
@@ -227,7 +227,7 @@ class TransactionController extends Controller
 
             Transaction::destroy($id);
             return response()->json([
-                'message' => 'Entrada eliminada correctamente'
+                'message' => 'Transacción  eliminada correctamente'
             ]);
 
         } elseif($transaction->movimiento == 'salida')
@@ -241,7 +241,7 @@ class TransactionController extends Controller
 
             Transaction::destroy($id);
             return response()->json([
-                'message' => 'Entrada eliminada correctamente'
+                'message' => 'Transacción  eliminada correctamente'
             ]);
 
         }

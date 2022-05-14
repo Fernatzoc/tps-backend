@@ -7,6 +7,7 @@ use Validator;
 use App\Models\User;
 
 use Illuminate\Http\Request;
+use function PHPUnit\Framework\isEmpty;
 
 class AuthController extends Controller
 {
@@ -115,7 +116,9 @@ class AuthController extends Controller
         $user = User::findOrFail($request->id);
         $user->name = $request->name;
         $user->email = $request->email;
-        $user->password = bcrypt($request->password);
+        if (!isEmpty($request->password)) {
+            $user->password = bcrypt($request->password);
+        }
         $user->role = $request->role;
 
         $user->save();
