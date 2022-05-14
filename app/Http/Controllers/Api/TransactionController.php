@@ -49,6 +49,8 @@ class TransactionController extends Controller
             ], 400);
         }
 
+        $response = '';
+
         if($request->movimiento == 'entrada' ) {
 
             $product = Product::findOrFail($request->id_producto);
@@ -66,7 +68,7 @@ class TransactionController extends Controller
 
             $transaction->save();
 
-            return response()->json([
+            $response = response()->json([
                 'ok' => true,
                 'transaction' => $transaction,
                 'message' => 'Entrada registrada correctamente'
@@ -81,7 +83,7 @@ class TransactionController extends Controller
                 return response()->json([
                     'ok' => true,
                     'message' => 'Error stock insuficiente'
-                ]);
+                ], 400);
             }
 
             $product->stock = intval($stock) - intval($request->cantidad);
@@ -97,13 +99,14 @@ class TransactionController extends Controller
 
             $transaction->save();
 
-            return response()->json([
+            $response = response()->json([
                 'ok' => true,
                 'transaction' => $transaction,
                 'message' => 'Entrada registrada correctamente'
             ]);
 
         }
+        return $response;
     }
 
     /**
@@ -124,7 +127,7 @@ class TransactionController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return JsonResponse
      */
     public function update(Request $request, $id)
     {
@@ -147,8 +150,17 @@ class TransactionController extends Controller
             $product = Product::findOrFail($request->id_producto);
             $transaction = Transaction::findOrFail($id);
             $stock = $product->stock;
-            $newStock = intval($stock) - intval($transaction->cantidad);
-            $product->stock = intval($newStock) + intval($request->cantidad);
+            $newStock = intval($transaction->cantidad) - intval($stock);
+
+            if($newStock >= intval($request->cantidad))
+            {
+                return response()->json([
+                    'ok' => true,
+                    'message' => 'Error stock insuficiente'
+                ], 400);
+            }
+
+            $product->stock = intval($request->cantidad) - $newStock;
             $product->save();
 
             $transaction->id_producto = intval($request->id_producto);
@@ -167,8 +179,17 @@ class TransactionController extends Controller
             $product = Product::findOrFail($request->id_producto);
             $transaction = Transaction::findOrFail($id);
             $stock = $product->stock;
-            $newStock = intval($stock) - intval($transaction->cantidad);
-            $product->stock = intval($newStock) - intval($request->cantidad);
+            $newStock = intval($stock) + intval($transaction->cantidad);
+
+            if($newStock < intval($request->cantidad))
+            {
+                return response()->json([
+                    'ok' => true,
+                    'message' => 'Error stock insuficiente'
+                ], 400);
+            }
+
+            $product->stock = $newStock - intval($request->cantidad);
             $product->save();
 
             $transaction->id_producto = intval($request->id_producto);

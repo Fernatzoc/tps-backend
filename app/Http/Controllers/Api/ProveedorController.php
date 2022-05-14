@@ -13,7 +13,7 @@ class ProveedorController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
@@ -85,7 +85,7 @@ class ProveedorController extends Controller
             'nombre' => 'required',
             'telefono' => 'required',
             'direccion' => 'required',
-            'correo' => 'required|email|unique:proveedores',
+            'correo' => 'required|email',
         ]);
 
         if($validator->fails()) {
