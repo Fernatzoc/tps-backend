@@ -50,6 +50,14 @@ class DashbordController extends Controller
             ->groupBy('categorias.id')
             ->get();
 
+        $reporte = DB::table('transactions')
+            ->join('products', 'products.id', '=', 'transactions.id_producto')
+            ->join('proveedores', 'proveedores.id', '=', 'products.id_proveedor')
+            ->join('categorias', 'categorias.id', '=', 'products.id_categoria')
+            ->select('transactions.*', 'products.nombre as producto', 'proveedores.nombre as proveedor', 'categorias.nombre as categoria')
+            ->orderBy('transactions.fecha', 'desc')
+            ->get();
+
         return response()->json([
            'count' => [
                'usuarios' => $usuarios,
@@ -61,6 +69,7 @@ class DashbordController extends Controller
             'trasacciones' => $movimientos,
             'proveerdores' => $topProveedores,
             'categorias' => $topCategorias,
+            'reporte' => $reporte
 
         ]);
     }
